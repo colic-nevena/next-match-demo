@@ -12,11 +12,15 @@ export default auth((req) => {
     if (isPublic) return NextResponse.next()
 
     if (isAuthRoute) {
-        if (isLoggedIn) return NextResponse.redirect(new URL("/members", nextUrl))
+        if (isLoggedIn) {
+            return NextResponse.redirect(new URL("/members", nextUrl))
+        }
         return NextResponse.next()
     }
 
-    if (!isPublic && !isLoggedIn) return NextResponse.redirect(new URL("/login", nextUrl))
+    if (!isPublic && !isLoggedIn) {
+        return NextResponse.redirect(new URL("/login", nextUrl))
+    }
 
     return NextResponse.next()
 })
