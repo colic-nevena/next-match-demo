@@ -3,8 +3,12 @@ import Link from "next/link";
 import React from "react";
 import { GiMatchTip } from "react-icons/gi";
 import NavLink from "./NavLink";
+import { auth } from "@/auth";
+import UserMenu from "./UserMenu";
 
-const TopNav = () => {
+export default async function TopNav() {
+  const session = await auth()
+
   return (
     <Navbar
       maxWidth="xl"
@@ -27,16 +31,21 @@ const TopNav = () => {
         <NavLink href="/messages" label="Messages" />
       </NavbarContent>
       <NavbarContent justify="end">
-        <Button as={Link} href="/login" variant="bordered" className="text-white" size="sm">
-          Login
-        </Button>
+        {session?.user ? (
+          <UserMenu user={session.user} />
+        ) : (
+          <>
+            <Button as={Link} href="/login" variant="bordered" className="text-white" size="sm">
+              Login
+            </Button>
 
-        <Button as={Link} href="/register" variant="bordered" className="text-white" size="sm">
-          Register
-        </Button>
+            <Button as={Link} href="/register" variant="bordered" className="text-white" size="sm">
+              Register
+            </Button>
+          </>
+        )}
       </NavbarContent>
     </Navbar>
   );
 };
 
-export default TopNav;
