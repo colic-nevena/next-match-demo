@@ -3,7 +3,7 @@ import { Card, CardFooter, Image } from '@nextui-org/react'
 import { Member } from '@prisma/client'
 import React from 'react'
 import Link from 'next/link';
-import { calculateAge } from '@/lib/util';
+import { calculateAge, transformImageUrl } from '@/lib/util';
 import LikeButton from '@/components/LikeButton';
 
 interface Props {
@@ -25,7 +25,7 @@ const MemberCard = ({ member, likeIds }: Props) => {
                 isZoomed
                 alt={member.name}
                 width={300}
-                src={member.image || "/images/user.png"}
+                src={transformImageUrl(member.image) || "/images/user.png"}
                 className='aspect-square object-cover'
             />
 

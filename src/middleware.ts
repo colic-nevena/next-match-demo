@@ -20,6 +20,10 @@ export default auth((req) => {
         return NextResponse.redirect(new URL('/login', nextUrl))
     }
 
+    if (isPublic && isLoggedIn) {
+        return NextResponse.redirect(new URL('/members', nextUrl))
+    }
+
     return NextResponse.next();
 })
 

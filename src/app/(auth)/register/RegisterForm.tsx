@@ -1,6 +1,7 @@
 "use client";
 import { registerUser } from "@/app/actions/authActions";
 import { registerSchema, RegisterSchema } from "@/lib/schemas/registerSchema";
+import { handleFormServerErrors } from "@/lib/util";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Card, CardBody, CardHeader, Input } from "@nextui-org/react";
 import React from "react";
@@ -10,6 +11,7 @@ import { GiPadlock } from "react-icons/gi";
 const RegisterForm = () => {
   const {
     register,
+    setError,
     handleSubmit,
     formState: { errors, isValid, isSubmitting },
   } = useForm<RegisterSchema>({
@@ -23,9 +25,7 @@ const RegisterForm = () => {
     if (result.status === "success") {
       console.log("radi registracijaaa jeeej");
     } else {
-      if (Array.isArray(result.error)) {
-        result.error.forEach((e) => console.log(e));
-      }
+      handleFormServerErrors(result, setError)
     }
   };
 
@@ -70,6 +70,11 @@ const RegisterForm = () => {
               isInvalid={!!errors.password}
               errorMessage={errors.password?.message}
             />
+
+            {errors.root?.serverError && (
+              <p className='text-danger text-sm'>{errors.root.serverError.message}</p>
+            )}
+
             <Button isLoading={isSubmitting} isDisabled={!isValid} fullWidth color="secondary" type="submit">
               Sign Up
             </Button>
