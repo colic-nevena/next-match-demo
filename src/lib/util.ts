@@ -1,9 +1,17 @@
-import { differenceInYears } from "date-fns";
+import { differenceInYears, format, formatDistance } from "date-fns";
 import { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { ZodIssue } from "zod";
 
 export function calculateAge(dateOfBirth: Date) {
     return differenceInYears(new Date(), dateOfBirth)
+}
+
+export function formatShortDateTime(date: Date) {
+    return format(date, "dd MM yy h:mm:a")
+}
+
+export function timeAgo(date: string) {
+    return formatDistance(new Date(date), new Date()) + ' ago';
 }
 
 export function handleFormServerErrors<TFieldValues extends FieldValues>(
@@ -28,4 +36,13 @@ export function transformImageUrl(imageUrl?: string | null) {
     const transformation = "c_fill,w_300,h_300,g_faces/"
 
     return `${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(uploadIndex)}`
+}
+
+export function truncateString(text?: string | null, num = 50) {
+    if (!text) return null
+    if (text.length <= num) {
+        return text
+    }
+
+    return text.slice(0, num) + "..."
 }
