@@ -5,6 +5,7 @@ import React from 'react'
 import Link from 'next/link';
 import { calculateAge, transformImageUrl } from '@/lib/util';
 import LikeButton from '@/components/LikeButton';
+import PresenceDot from '@/components/PresenceDot';
 
 interface Props {
     member: Member
@@ -32,6 +33,9 @@ const MemberCard = ({ member, likeIds }: Props) => {
             <div onClick={preventOnLikeRedirection}>
                 <div className='absolute top-3 right-3 z-50'>
                     <LikeButton targetId={member.userId} hasLiked={hasLiked} />
+                </div>
+                <div className='absolute top-2 left-3 z-50'>
+                    <PresenceDot member={member} />
                 </div>
             </div>
 

@@ -3,9 +3,9 @@
 import { MessageDto } from '@/types'
 import React, { useRef } from 'react'
 import clsx from 'clsx';
-import { Avatar } from '@nextui-org/react';
 import { timeAgo, transformImageUrl } from '@/lib/util';
 import { useEffect } from 'react';
+import PresenceAvatar from '@/components/PresenceAvatar';
 // import PresenceAvatar from '@/components/PresenceAvatar';
 
 type Props = {
@@ -24,9 +24,9 @@ export default function MessageBox({ message, currentUserId }: Props) {
 
     const renderAvatar = () => (
         <div className='self-end'>
-            <Avatar
-                src={transformImageUrl(message.senderImage) || '/images/user.png'}
-            // userId={message.senderId}
+            <PresenceAvatar
+                userId={message.senderId}
+                src={transformImageUrl(message.senderImage) || "/images/user.png"}
             />
         </div>
 

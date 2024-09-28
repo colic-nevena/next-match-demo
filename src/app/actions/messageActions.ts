@@ -1,13 +1,14 @@
 'use server'
 
 import { messageSchema, MessageSchema } from "@/lib/schemas/messageSchema";
-import { ActionResult } from "@/types";
+import { ActionResult, MessageDto } from "@/types";
 import { getAuthUserId } from "./authActions";
 import prisma from "@/lib/prisma";
-import { Message } from "@prisma/client";
 import { mapMessageToMessageDTO } from "@/lib/mappings";
+import { pusherServer } from "@/lib/pusher";
+import { createChatId } from "@/lib/util";
 
-export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<Message>> {
+export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<MessageDto>> {
     try {
         const userId = await getAuthUserId()
 
@@ -22,10 +23,16 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
                 text,
                 recipientId: recipientUserId,
                 senderId: userId
-            }
+            },
+            select: messageSelect
         })
 
-        return { status: "success", data: message }
+        const messageDto = mapMessageToMessageDTO(message)
+
+        await pusherServer.trigger(createChatId(userId, recipientUserId), "message:new", messageDto)
+        await pusherServer.trigger(`private-${recipientUserId}`, "message:new", messageDto)
+
+        return { status: "success", data: messageDto }
     } catch (error) {
         console.log(error)
         return { status: "error", error: (error as Error).message }
@@ -57,20 +64,32 @@ export async function getMessageThread(recipientId: string) {
             select: messageSelect
         });
 
+        let readCount = 0;
+
         if (messages.length > 0) {
+            const readMessageIds = messages
+                .filter(message => message.dateRead === null
+                    && message.recipient?.userId === userId
+                    && message.sender?.userId === recipientId)
+                .map(message => message.id)
+
             await prisma.message.updateMany({
                 where: {
-                    senderId: recipientId,
-                    recipientId: userId,
-                    dateRead: null
+                    id: { in: readMessageIds }
                 },
                 data: {
                     dateRead: new Date()
                 }
             })
+
+            readCount = readMessageIds.length
+
+            await pusherServer.trigger(createChatId(recipientId, userId), "messages:read", readMessageIds)
         }
 
-        return messages.map(msg => mapMessageToMessageDTO(msg))
+        const messagesToReturn = messages.map(msg => mapMessageToMessageDTO(msg))
+
+        return { messages: messagesToReturn, readCount }
     } catch (error) {
         console.log(error)
         throw error
@@ -139,6 +158,23 @@ export async function deleteMessage(messageId: string, isOutbox: boolean) {
                 }
             })
         }
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
+export async function getUnreadMessagesCount() {
+    try {
+        const userId = await getAuthUserId()
+
+        return prisma.message.count({
+            where: {
+                recipientId: userId,
+                dateRead: null,
+                recipientDeleted: false
+            }
+        })
     } catch (error) {
         console.log(error)
         throw error
