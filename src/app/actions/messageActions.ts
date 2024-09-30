@@ -96,7 +96,7 @@ export async function getMessageThread(recipientId: string) {
     }
 }
 
-export async function getMessagesByContainer(container: string) {
+export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 10) { // check out cursor pagination algorithm
     try {
         const userId = await getAuthUserId()
 
@@ -106,14 +106,31 @@ export async function getMessagesByContainer(container: string) {
         }
 
         const messages = await prisma.message.findMany({
-            where: conditions,
+            where: {
+                ...conditions,
+                ...(cursor ? { createdAt: { lte: new Date(cursor) } } : {}) // everything up until the cursor
+            },
             select: messageSelect,
+            take: limit + 1, // +1 will be the start of the next batch, cursor
             orderBy: {
                 createdAt: "desc"
             }
         })
 
-        return messages.map(msg => mapMessageToMessageDTO(msg))
+        let nextCursor: string | undefined;
+        if (messages.length > limit) {
+            const nextItem = messages.pop() // taking the +1 message
+            nextCursor = nextItem?.createdAt.toISOString()
+        } else {
+            nextCursor = undefined
+        }
+
+        const messagesToReturn = messages.map(msg => mapMessageToMessageDTO(msg))
+
+        return {
+            messages: messagesToReturn,
+            nextCursor
+        }
     } catch (error) {
         console.log(error)
         throw error
