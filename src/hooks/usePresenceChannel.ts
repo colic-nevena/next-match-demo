@@ -26,6 +26,7 @@ export const usePresenceChannel = (userId: string | null, profileComplete: boole
 
     useEffect(() => {
         if (!userId || !profileComplete) return;
+
         if (!channelRef.current) {
             channelRef.current = pusherClient.subscribe('presence-nm');
 
