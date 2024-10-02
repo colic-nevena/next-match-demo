@@ -22,7 +22,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
     const link = `${baseUrl}/reset-password?token=${token}`;
 
     return resend.emails.send({
-        from: 'mail@nextmatch.trycatchlearn.com',
+        from: '', // TODO
         to: email,
         subject: 'Reset your password',
         html: `
