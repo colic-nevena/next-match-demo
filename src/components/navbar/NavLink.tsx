@@ -13,7 +13,6 @@ type Props = {
 
 export default function NavLink({ href, label }: Props) {
   const pathname = usePathname();
-
   const { unreadCount } = useMessageStore(state => ({
     unreadCount: state.unreadCount
   }))

@@ -1,12 +1,11 @@
 'use client';
 
-import { Tab, Tabs } from '@nextui-org/react';
+import { Spinner, Tab, Tabs } from '@nextui-org/react';
 import { Member } from '@prisma/client';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useTransition } from 'react'
 import { Key } from 'react';
 import MemberCard from '../members/MemberCard';
-import LoadingComponent from '@/components/LoadingComponent';
 
 type Props = {
     members: Member[];
@@ -45,7 +44,7 @@ export default function ListsTab({ members, likeIds }: Props) {
                         <Tab key={item.id} title={item.label} />
                     ))}
                 </Tabs>
-                {isPending && <LoadingComponent />}
+                {isPending && <Spinner color='secondary' className='self-center ml-3' />}
             </div>
 
             {tabs.map((item) => {

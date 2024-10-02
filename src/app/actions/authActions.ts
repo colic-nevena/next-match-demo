@@ -250,12 +250,12 @@ export async function completeSocialLoginProfile(data: ProfileSchema): Promise<A
     }
 }
 
-// export async function getUserRole() {
-//     const session = await auth();
+export async function getUserRole() {
+    const session = await auth();
 
-//     const role = session?.user.role;
+    const role = session?.user.role;
 
-//     if (!role) throw new Error('Not in role');
+    if (!role) throw new Error('Not in role');
 
-//     return role;
-// }
+    return role;
+}

@@ -9,7 +9,7 @@ export default auth((req) => {
     const isPublic = publicRoutes.includes(nextUrl.pathname);
     const isAuthRoute = authRoutes.includes(nextUrl.pathname);
     const isProfileComplete = req.auth?.user.profileComplete;
-    const isAdmin = false //req.auth?.user.role === 'ADMIN';
+    const isAdmin = req.auth?.user.role === 'ADMIN';
     const isAdminRoute = nextUrl.pathname.startsWith('/admin');
 
     if (isPublic || isAdmin) {

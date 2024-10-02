@@ -1,11 +1,12 @@
+import AppModal from '@/components/AppModal';
 import PresenceAvatar from '@/components/PresenceAvatar';
 import { truncateString } from '@/lib/util';
 import { MessageDto } from '@/types'
-import { Button } from '@nextui-org/react';
+import { Button, ButtonProps, useDisclosure } from '@nextui-org/react';
 import React from 'react'
 import { AiFillDelete } from 'react-icons/ai';
 
-interface Props {
+type Props = {
     item: MessageDto;
     columnKey: string;
     isOutbox: boolean;
@@ -13,12 +14,22 @@ interface Props {
     isDeleting: boolean;
 }
 
-const MessageTableCell = ({ item, columnKey, isDeleting, isOutbox, deleteMessage }: Props) => {
-    const cellValue = item[columnKey as keyof MessageDto]
+export default function MessageTableCell({ item, columnKey, isOutbox, deleteMessage, isDeleting }: Props) {
+    const cellValue = item[columnKey as keyof MessageDto];
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const onConfirmDeleteMessage = () => {
+        deleteMessage(item);
+    }
+
+    const footerButtons: ButtonProps[] = [
+        { color: 'default', onClick: onClose, children: 'Cancel' },
+        { color: 'secondary', onClick: onConfirmDeleteMessage, children: 'Confirm' },
+    ];
 
     switch (columnKey) {
-        case "recipientName":
-        case "senderName":
+        case 'recipientName':
+        case 'senderName':
             return (
                 <div className='flex items-center gap-2 cursor-pointer'>
                     <PresenceAvatar
@@ -28,29 +39,35 @@ const MessageTableCell = ({ item, columnKey, isDeleting, isOutbox, deleteMessage
                     <span>{cellValue}</span>
                 </div>
             )
-
-        case "text":
+        case 'text':
             return (
                 <div>
-                    {truncateString(cellValue)}
+                    {truncateString(cellValue, 80)}
                 </div>
             )
-
-        case "createdAt":
-            return cellValue
-
+        case 'created':
+            return <div>{cellValue}</div>
         default:
             return (
-                <Button
-                    isIconOnly
-                    variant='light'
-                    onClick={() => deleteMessage(item)}
-                    isLoading={isDeleting}
-                >
-                    <AiFillDelete size={24} className='text-danger' />
-                </Button>
+                <>
+                    <Button
+                        isIconOnly variant='light'
+                        onClick={() => onOpen()}
+                        isLoading={isDeleting}
+                    >
+                        <AiFillDelete size={24} className='text-danger' />
+                    </Button>
+                    <AppModal
+                        isOpen={isOpen}
+                        onClose={onClose}
+                        header='Please confirm this action'
+                        body={<div>
+                            Are you sure you want to delete this message? This cannot be undone.
+                        </div>}
+                        footerButtons={footerButtons}
+                    />
+                </>
+
             )
     }
 }
-
-export default MessageTableCell
